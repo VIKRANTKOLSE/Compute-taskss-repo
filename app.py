@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler,MinMaxScaler,RobustScaler
+from sklearn.cluster import KMeans,AgglomerativeClustering,DBSCAN
 
 #Generating database
 def make_datset(no_of_samples=400,centers=3,cluster_std=0.7):
@@ -65,10 +66,10 @@ scaled_df=scaling(X,scaling_option)
 
 
 #Using Clustering algorithm
-from sklearn.cluster import KMeans,AgglomerativeClustering,DBSCAN
+
 def perform_clustering(X, algo, n_clusters, eps, min_samples):
     if algo == 'KMeans':
-        model = KMeans(n_clusters=n_clusters, random_state=42, n_init='k-means++')
+        model = KMeans(n_clusters=n_clusters, random_state=42)
         labels = model.fit_predict(X)
     
     elif algo == 'AgglomerativeClustering':
@@ -80,7 +81,10 @@ def perform_clustering(X, algo, n_clusters, eps, min_samples):
         labels = model.fit_predict(X)
     return labels
 
-cluster_labels = perform_clustering(scaled_df, cluster_algo, n_clusters, dbscan_eps, dbscan_min_samples)
+if cluster_algo == 'DBSCAN':
+    cluster_labels = perform_clustering(scaled_df, cluster_algo, None, dbscan_eps, dbscan_min_samples)
+else:
+    cluster_labels = perform_clustering(scaled_df, cluster_algo, n_clusters, None, None)
 
 
 #Evaluating the outputs
@@ -93,3 +97,8 @@ ch_score = calinski_harabasz_score(scaled_df, cluster_labels)
 #Plotting the clusters
 plot_df = scaled_df.copy()
 plot_df['Cluster'] = cluster_labels
+valid_cluster_labels = np.unique(cluster_labels)
+
+st.subheader(f"Visualization: {scaling_option} + {cluster_algo}")
+
+st.scatter_chart(plot_df,x='Feature_1',y='Feature_2',color='Cluster',height=500)
